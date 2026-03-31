@@ -1,0 +1,106 @@
+\documentclass[12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{times}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{indentfirst}
+
+\geometry{a4paper, margin=2.5cm}
+
+\lstset{
+  language=Python,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries,
+  numbers=left,
+  numberstyle=\tiny,
+  stepnumber=1,
+  numbersep=5pt,
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  literate=
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {ã}{{\~a}}1 {õ}{{\~o}}1 {ç}{{\c{c}}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {Ã}{{\~A}}1 {Õ}{{\~O}}1 {Ç}{{\c{C}}}1
+    {ê}{{\^e}}1 {â}{{\^a}}1
+}
+
+\title{O Problema do Caminho Mais Longo com Restrições\\em Grafos Direcionados Acíclicos}
+
+\author{
+  Gabriel Rocha\\
+  Centro Universitário -- Católica de Santa Catarina\\
+  Curso de Engenharia de Software\\
+  Disciplina: Algoritmos Avançados
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Resumo}
+
+Este trabalho aborda o problema de encontrar o caminho simples de maior peso entre dois vértices em um grafo direcionado acíclico (DAG), sujeito à restrição de que o caminho pode conter no máximo $K$ vértices. A solução foi implementada em Python, utilizando uma abordagem de busca em profundidade (DFS) com \textit{backtracking} e poda. O algoritmo enumera todos os caminhos válidos entre a origem e o destino, respeitando o limite de vértices, e retorna aquele com maior peso total.
+
+\section{Introdução}
+
+O problema do caminho mais longo em grafos é um problema clássico na área de algoritmos e teoria dos grafos. Diferentemente do problema do caminho mais curto, que pode ser resolvido eficientemente por algoritmos como Dijkstra ou Bellman-Ford, o problema do caminho mais longo é, em geral, NP-difícil para grafos arbitrários. No entanto, quando o grafo é um \textbf{grafo direcionado acíclico (DAG)}, o problema admite soluções em tempo polinomial utilizando ordenação topológica.
+
+Neste trabalho, o problema possui uma restrição adicional: o caminho entre a origem e o destino pode possuir \textbf{no máximo $K$ vértices}, incluindo a origem e o destino. Essa restrição limita a profundidade da busca e torna viável uma abordagem baseada em \textbf{busca em profundidade (DFS) com \textit{backtracking}}.
+
+A solução foi implementada na linguagem \textbf{Python}, escolhida pela sua simplicidade de sintaxe, facilidade de manipulação de estruturas de dados e compatibilidade com a plataforma de testes JDoodle. A abordagem escolhida é uma \textbf{enumeração exaustiva com poda}: o algoritmo percorre todos os caminhos possíveis a partir da origem, podando ramos que excedam o limite de $K$ vértices, e mantém registro do caminho de maior peso encontrado.
+
+\section{Desenvolvimento}
+
+A implementação consiste em um único arquivo \texttt{main.py}, organizado em três funções principais e um bloco de execução.
+
+\subsection{Leitura da entrada (\texttt{parse\_input})}
+
+A função \texttt{parse\_input(filename)} é responsável por ler o arquivo de entrada e extrair os dados do problema. O arquivo segue um formato pré-definido onde linhas iniciadas com \texttt{\#} são comentários e linhas em branco são ignoradas. Os dados são extraídos sequencialmente: primeiro o número de vértices $N$, em seguida a matriz de adjacência $N \times N$, o vértice de origem, o vértice de destino e o número máximo de vértices $K$.
+
+Na matriz de adjacência, o valor 0 indica ausência de aresta, enquanto qualquer valor inteiro diferente de zero (positivo ou negativo) representa o peso da aresta correspondente.
+
+\subsection{Algoritmo de busca (\texttt{find\_longest\_path})}
+
+A função \texttt{find\_longest\_path(n, matrix, source, dest, k)} implementa o algoritmo central da solução. Internamente, utiliza uma função recursiva \texttt{dfs(v, path, weight, remaining)} que realiza a busca em profundidade:
+
+\begin{itemize}
+  \item \textbf{Caso base -- destino alcançado:} Se o vértice atual $v$ é o destino, verifica se o peso acumulado é maior que o melhor encontrado até o momento. Em caso positivo, atualiza o melhor caminho e peso.
+  \item \textbf{Poda por limite de vértices:} Se o parâmetro \texttt{remaining} (número de vértices ainda permitidos) é zero, a recursão é interrompida.
+  \item \textbf{Expansão:} Para cada vizinho $u$ de $v$ (ou seja, onde \texttt{matrix[v][u] $\neq$ 0}), o algoritmo adiciona $u$ ao caminho atual, realiza a chamada recursiva com o peso atualizado e \texttt{remaining} decrementado, e então remove $u$ do caminho (\textit{backtracking}).
+\end{itemize}
+
+A chamada inicial é feita com o vértice de origem já incluído no caminho e \texttt{remaining} = $K - 1$, pois a origem já ocupa uma das $K$ posições permitidas.
+
+Um caso especial é tratado: quando a origem é igual ao destino e $K \geq 1$, o caminho trivial contendo apenas o vértice de origem é retornado com peso 0.
+
+\subsection{Formatação da saída (\texttt{print\_result})}
+
+A função \texttt{print\_result(path, weight)} exibe o resultado no formato especificado pela definição do trabalho. Se nenhum caminho válido foi encontrado, imprime a mensagem ``Não existe caminho válido.''. Caso contrário, exibe o caminho como uma lista de vértices, o peso total e o número de vértices no caminho.
+
+\subsection{Análise de complexidade}
+
+Como o grafo é um DAG, não existem ciclos, o que garante que a busca em profundidade sempre termina. A complexidade de tempo no pior caso é $O(P \cdot K)$, onde $P$ é o número de caminhos simples da origem ao destino com no máximo $K$ vértices. Em grafos densos, $P$ pode crescer exponencialmente; porém, a restrição de $K$ vértices e a estrutura acíclica do grafo limitam significativamente o espaço de busca na prática.
+
+A complexidade de espaço é $O(K)$ para a pilha de recursão e o caminho atual, além de $O(N^2)$ para a matriz de adjacência.
+
+\subsection{Limitações}
+
+A principal limitação da abordagem por DFS com \textit{backtracking} é seu custo exponencial no pior caso. Para grafos muito grandes e densos, com valores elevados de $K$, o número de caminhos a explorar pode tornar o algoritmo impraticável. Nesses cenários, uma abordagem por \textbf{programação dinâmica} com estado $dp[v][k]$ (maior peso para chegar ao vértice $v$ usando exatamente $k$ vértices) processado em ordem topológica seria mais eficiente, com complexidade $O(K \cdot E)$, onde $E$ é o número de arestas. No entanto, para os grafos de teste propostos neste trabalho, a abordagem por DFS é suficiente.
+
+\section{Conclusão}
+
+A solução implementada resolve o problema do caminho mais longo com restrição de vértices em grafos direcionados acíclicos de forma correta e eficiente para os casos de teste propostos. A abordagem por busca em profundidade com \textit{backtracking} mostrou-se adequada, sendo simples de implementar e capaz de tratar todos os casos especiais, incluindo pesos negativos, ausência de caminho válido e o caso trivial em que origem e destino coincidem.
+
+O algoritmo foi validado com o exemplo fornecido na especificação do trabalho, obtendo corretamente o caminho $[0, 1, 3, 4]$ com peso total 12 e 4 vértices, confirmando a corretude da implementação.
+
+\end{document}
