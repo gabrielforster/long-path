@@ -74,7 +74,7 @@ def print_result(path, weight):
 
 
 if __name__ == "__main__":
-    filename = sys.argv[1] if len(sys.argv) > 1 else "entrada.txt"
+    filename = sys.argv[1] if len(sys.argv) > 1 else "/uploads/entrada.txt"
     n, matrix, source, dest, k = parse_input(filename)
     path, weight = find_longest_path(n, matrix, source, dest, k)
     print_result(path, weight)
